@@ -1,5 +1,16 @@
-#grid {
+#grid-container {
   display: grid;
+  width: 400px;
+  height: 400px;
   grid-template-rows: 33.33% 33.33% 33.33%;
   grid-template-columns: 33.33% 33.33% 33.33%;
+}
+
+#grid-container > div {
+  background-color: blue;
+}
+
+#grid-container > div > p {
+  font-size: 40px;
+  text-align: center;
 }
