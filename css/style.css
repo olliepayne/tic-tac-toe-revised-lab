@@ -11,6 +11,6 @@
 }
 
 #grid-container > div > p {
-  font-size: 40px;
-  text-align: center;
+  font-size: 60px;
+  /* text-align: center; */
 }

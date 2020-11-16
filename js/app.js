@@ -2,6 +2,12 @@ const gridContainerEl = document.getElementById('grid-container');
 const cachedCellEls = gridContainerEl.querySelectorAll('div');
 function addCellEventListeners() {
   for(let i = 0; i < cachedCellEls.length; i++) {
+    cachedCellEls[i].addEventListener('mouseover', function() {
+      cachedCellEls[i].style.opacity = 0.8;
+    });
+    cachedCellEls[i].addEventListener('mouseleave', function() {
+      cachedCellEls[i].style.opacity = 1;
+    });
     cachedCellEls[i].addEventListener('click', function() {
       player.playTurn(i);
     });
@@ -59,9 +65,9 @@ const grid = {
       if(this.cells[i] === pieceType) {
         const cellRight = i + 1;
         const cellDown = i + this.width;
-        const cellDownRight = i + this.width + 1;
         const cellDownLeft = i + this.width - 1;
-         
+        const cellDownRight = i + this.width + 1;
+
         if(this.isOnGrid(cellRight) && this.cells[cellRight] === pieceType) {
           const winningCell = cellRight + 1;
           if(this.isOnGrid(winningCell) && this.cells[winningCell] === pieceType) {
@@ -72,17 +78,19 @@ const grid = {
           if(this.isOnGrid(winningCell) && this.cells[winningCell] === pieceType) {
             game.endGame(game.idOwner(pieceType));
           }
+        } else if(this.isOnGrid(cellDownLeft) && this.cells[cellDownLeft] === pieceType) {
+          const winningCell = cellDownLeft + this.width - 1;
+          console.log(this.cells[winningCell]);
+          if(this.isOnGrid(winningCell) && this.cells[winningCell] === pieceType) {
+            console.log('test');
+            game.endGame(game.idOwner(pieceType));
+          }
         } else if(this.isOnGrid(cellDownRight) && this.cells[cellDownRight] === pieceType) {
           const winningCell = cellDownRight + this.width + 1;
           if(this.isOnGrid(winningCell) && this.cells[winningCell] === pieceType) {
             game.endGame(game.idOwner(pieceType));
           }
-        } else if(this.isOnGrid(cellDownLeft) && this.cells[cellDownLeft] === pieceType) {
-          const winningCell = cellDownLeft + this.width - 1;
-          if(this.isOnGrid(winningCell) && this.cells[winningCell] === pieceType) {
-            game.endGame(game.idOwner(pieceType));
-          }
-        }
+        } 
       }
     }
   },
