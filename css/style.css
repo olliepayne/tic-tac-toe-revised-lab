@@ -1,3 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap');
+
+body {
+  font-family: 'Roboto Mono', monospace;
+}
+
 #grid-container {
   display: grid;
   width: 400px;
@@ -12,5 +18,5 @@
 
 #grid-container > div > p {
   font-size: 60px;
-  /* text-align: center; */
+  text-align: center;
 }
