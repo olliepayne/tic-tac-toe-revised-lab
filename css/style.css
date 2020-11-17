@@ -18,14 +18,12 @@ body {
 }
 
 #grid-container > div {
-  display: flex;
   background-color: peachpuff;
 }
 
 #grid-container > div > p {
-  display: flex;
-  font-size: 70px;
+  display: inline;
+  font-size: 90px;
   color: black;
-  /* justify-content: center;
-  align-self: center; */
+  text-align: center;
 }
