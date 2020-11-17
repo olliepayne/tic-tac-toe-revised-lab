@@ -1,248 +1,134 @@
+// get input from the user and print a value onto the grid
+// store the values
+// cache html elements
+// have a win condition
+// initialize AND reset the grid
+// keep track of who wins each game
+
 // ---CACHED DOM ELEMENTS---
-const gridContainerEl = document.getElementById('grid-container');
-const cachedCellEls = gridContainerEl.querySelectorAll('div');
-function addCellEventListeners() {
-  for(let i = 0; i < cachedCellEls.length; i++) {
-    cachedCellEls[i].addEventListener('mouseover', function() {
-      cachedCellEls[i].style.opacity = 0.8;
-    });
-    cachedCellEls[i].addEventListener('mouseleave', function() {
-      cachedCellEls[i].style.opacity = 1;
-    });
-    cachedCellEls[i].addEventListener('click', function() {
-      player.playTurn(i);
-    });
-  }
+const cellEls = document.getElementById('grid-container').querySelectorAll('div');
+for(let i = 0; i < cellEls.length; i++) {
+  cellEls[i].addEventListener('click', function() {
+    clickedCell(i);
+  });
+
+  // visual feedback when hovering over a cell
+  cellEls[i].addEventListener('mouseover', function() {
+    cellEls[i].style.opacity = 0.8;
+  });
+  cellEls[i].addEventListener('mouseleave', function() {
+    cellEls[i].style.opacity = 1;
+  });
 }
-addCellEventListeners();
-
-const xoButtonContainerEl = document.getElementById('xo-button-container');
-const xButtonEl = document.getElementById('x-button');
-xButtonEl.addEventListener('click', function() {
-  player.pieceType = 'x';
-  enemy.pieceType = 'o';
-
-  xoButtonContainerEl.style.visibility = 'hidden';
-});
-const oButtonEl = document.getElementById('o-button');
-oButtonEl.addEventListener('click', function() {
-  player.pieceType = 'o';
-  enemy.pieceType = 'x';
-
-  xoButtonContainerEl.style.visibility = 'hidden';
-});
 
 const scoreEl = document.getElementById('score');
+scoreEl.innerHTML = 'Score X: 0 // O: 0';
+
+const gameMessageEl = document.getElementById('game-message');
+
+// ---GLOBAL VARIABLES---
+let running = false;
+let turn = 1;
+let grid = [];
+
+let playerPiece = 'x';
+let playerScore = 0;
+let computerPiece = 'o';
+let computerScore = 0;
 
 // ---GAME---
+function init() {
+  // game is now running
+  running = true;
 
-const game = {
-  running: false,
-  score: [
-    {playerScore: 0},
-    {enemyScore: 0},
-  ],
-  init: function() {
-    // game is now running
-    this.running = true;
+  // clear the visual grid
+  for(let i = 0; i < cellEls.length; i++) {
+    cellEls[i].querySelector('p').innerHTML = '';
+  }
 
-    // reset the scoreboard
-    this.score['playerScore'] = 0;
-    this.score['enemyScore'] = 0;
-    this.renderScore(`Score X: 0 // O: 0`);
+  // clear the grid values
+  grid = [];
+  drawGrid();
 
-    // hide the x o choice buttons
-    xoButtonContainerEl.style.visibility = 'hidden';
-
-    // reset grid array, then fill with empty cells
-    grid.reset();
-    grid.drawGrid(3, 3);
-
-    // game is nearly ready to play, decide who goes first
-    turnHandler.decideInitialTurn();
-  },
-  idOwner: function(pieceType) {
-    if(pieceType === player.pieceType) {
-      return 'player';
-    } else if(pieceType === enemy.pieceType) {
-      return 'enemy';
-    }
-  },
-  endGame: function(winner) {
-    turnHandler.stop();
-
-    if(winner === 'player') {
-      this.score['playerScore']++;
-      console.log(this.score['playerScore']);
-    } else if(winner === 'enemy') {
-      this.score['enemyScore']++;
-    }
-
-    // display new score on the page
-    if(player.pieceType === 'x') {
-      this.renderScore(`Score X: ${this.score['playerScore']} // O: ${this.score['enemyScore']}`);
-    } else {
-      this.renderScore(`Score X: ${this.score['enemyScore']} // O: ${this.score['playerScore']}`);
-    }
-
-    game.init();
-  },
-  renderScore: function(str) {
-    scoreEl.innerHTML = str;
-  },
+  // game is ready
+  turn = 1;
 }
 
-const turnHandler = {
-  decideInitialTurn: function() {
-    if(Math.random() < 0.5) {
-      player.choosePiece();
-      this.turnSequencer('playerTurn');
-    } else {
-      enemy.choosePiece();
-      this.turnSequencer('enemyTurn');
-    }
-  },
-  turnSequencer: function(event) {
-    switch(event) {
-      case 'playerTurn':
-        enemy.turn = false; 
-        player.turn = true;
-      break;
-
-      case 'enemyTurn':
-        player.turn = false;    
-        enemy.turn = true; 
-        enemy.playTurn();
-      break;
-    }
-  },
-  stop: function() {
-    player.turn = false;
-    enemy.turn = false;
-  },
+function drawGrid(w, h) {
+  for(let i = 0; i < 9; i++) {
+    grid.push('');
+  }
 }
 
-const grid = {
-  width: 0,
-  height: 0,
-  cells: [],
-  reset: function() {
-    this.cells = [];
-    this.width = 0;
-    this.height = 0;
-  },
-  drawGrid: function(w, h) {
-    for(let i = 0; i < w * h; i++) {
-      this.cells.push('');
-    }
+function clickedCell(cellIndex) {
+  if(turn % 2 === 1 && running) {
+    if(grid[cellIndex] === '') {
+      fillCell(cellIndex, playerPiece);
 
-    this.width = w;
-    this.height = h;
-  },
-  setCellValue: function(i, pieceType) {
-    this.cells[i] = pieceType;
-  },
-  renderNewCellValue: function(i, pieceType) {
-    cachedCellEls[i].querySelector('p').innerText = pieceType;
-  },
-  checkNeighbors: function(pieceType) {
-    for(let i = 0; i < this.cells.length; i++) {
-      // check for a win condition
-      if(this.cells[i] === pieceType) {
-        const cellRight = i + 1;
-        const cellDown = i + this.width;
-        const cellDownLeft = i + this.width - 1;
-        const cellDownRight = i + this.width + 1;
-
-        if(this.isOnGrid(cellRight) && this.cells[cellRight] === pieceType) {
-          const winningCell = cellRight + 1;
-          if(this.isOnGrid(winningCell) && this.cells[winningCell] === pieceType) {
-            game.endGame(game.idOwner(pieceType));
-          }
-        } else if(this.isOnGrid(cellDown) && this.cells[cellDown] === pieceType) {
-          const winningCell = cellDown + this.width;
-          if(this.isOnGrid(winningCell) && this.cells[winningCell] === pieceType) {
-            game.endGame(game.idOwner(pieceType));
-          }
-        } else if(this.isOnGrid(cellDownLeft) && this.cells[cellDownLeft] === pieceType) {
-          const winningCell = cellDownLeft + this.width - 1;
-          if(this.isOnGrid(winningCell) && this.cells[winningCell] === pieceType) {
-            console.log('test');
-            game.endGame(game.idOwner(pieceType));
-          }
-        } else if(this.isOnGrid(cellDownRight) && this.cells[cellDownRight] === pieceType) {
-          const winningCell = cellDownRight + this.width + 1;
-          if(this.isOnGrid(winningCell) && this.cells[winningCell] === pieceType) {
-            game.endGame(game.idOwner(pieceType));
-          }
-        } 
+      // play next turn if fill cell didnt trigger end game condition
+      if(running) {
+        turn++;
+        computerTurn();
       }
     }
-  },
-  isOnGrid: function(cellIdx) {
-    if(cellIdx >= 0 && cellIdx < this.width * this.height) {
-      return true;
-    } else {
-      return false;
-    }
-  },
-  isEmptyCell: function(i) {
-    if(this.cells[i] === '') {
-      return true;
-    } else {
-      return false;
-    }
-  },
+  }
 }
 
-const player = {
-  pieceType: '',
-  choosePiece: function() {
-    xoButtonContainerEl.style.visibility = 'visible';
-  },
-  turn: false,
-  playTurn: function(i) {
-    if(this.pieceType !== '') {
-      if(this.turn && game.running) {
-        if(grid.isEmptyCell(i)) {
-          grid.setCellValue(i, this.pieceType);
-          grid.renderNewCellValue(i, this.pieceType);
-          grid.checkNeighbors(this.pieceType);
-  
-          turnHandler.turnSequencer('enemyTurn');
-        }
+function fillCell(i, type) {
+  grid[i] = type;
+  cellEls[i].querySelector('p').innerHTML = type;
+  checkNeighbors(type);
+}
+
+function checkNeighbors(type) {
+  for(let i = 0; i < grid.length; i++) {
+    if(grid[i] === type) {
+      if(grid[i + 1] === type && grid[i + 2] === type) {  // horiz logic
+        endGame(type);
+      } else if(grid[i + 3] === type && grid[i + 6] === type) { // vert logic
+        endGame(type);
+      } else if(grid[i + 4] === type && grid[i + 8] === type) { // down-right logic
+        endGame(type);
+      } else if(grid[i + 2] === type && grid[i +4] === type) {  // down-left logic
+        endGame(type);
       }
     }
-  },
+  }
 }
 
-const enemy = {
-  pieceType: '',
-  choosePiece: function() {
-    if(Math.random() < 0.5) {
-      this.pieceType = 'x';
-      player.pieceType = 'o';
-    } else {
-      this.pieceType = 'o';
-      player.pieceType = 'x';
+function computerTurn() {
+  if(turn % 2 === 0 && turn !== 10 && running) {
+    let randomCellIndex = Math.floor(Math.random() * grid.length);
+    while(grid[randomCellIndex] !== '') {
+      randomCellIndex = Math.floor(Math.random() * grid.length);
     }
-  },
-  turn: false,
-  playTurn: function() {
-    if(this.pieceType !== '') {
-      if(this.turn && game.running) {
-        let randomCell = Math.floor(Math.random() * grid.cells.length);
-        while(!grid.isEmptyCell(randomCell)) {
-          randomCell = Math.floor(Math.random() * grid.cells.length);
-        }
-        grid.setCellValue(randomCell, this.pieceType);
-        grid.renderNewCellValue(randomCell, this.pieceType);
-        grid.checkNeighbors(this.pieceType);
-  
-        turnHandler.turnSequencer('playerTurn');
-      }
+    fillCell(randomCellIndex, computerPiece);
+
+    // play next turn if fill cell didnt trigger end game condition
+    if(running) {
+      turn++;
     }
-  },
+  } else if(turn === 10) {
+    init();
+  }
 }
 
-game.init();
+function endGame(winningType) {
+  running = false;
+
+  if(winningType === playerPiece) {
+    playerScore++;
+  } else if(winningType === computerPiece) {
+    computerScore++;
+  }
+
+  if(playerPiece === 'x') {
+    scoreEl.innerHTML = `Score X: ${playerScore} // O: ${computerScore}`;
+  } else if(playerPiece === 'o'){
+    scoreEl.innerHTML = `Score X: ${computerScore} // O: ${playerScore}`;
+  }
+
+  init();
+}
+
+init();
