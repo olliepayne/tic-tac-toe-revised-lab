@@ -14,13 +14,18 @@ body {
   grid-template-rows: 33.33% 33.33% 33.33%;
   grid-template-columns: 33.33% 33.33% 33.33%;
   grid-gap: 3px;
+  margin: 0 auto;
 }
 
 #grid-container > div {
+  display: flex;
   background-color: peachpuff;
 }
 
 #grid-container > div > p {
-  font-size: 60px;
-  text-align: center;
+  display: flex;
+  font-size: 70px;
+  color: black;
+  /* justify-content: center;
+  align-self: center; */
 }
