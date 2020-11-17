@@ -1,7 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap');
 
 body {
+  background-color: #1c1c1c;
   font-family: 'Roboto Mono', monospace;
+  color: white;
+  text-align: center;
 }
 
 #grid-container {
@@ -10,6 +13,7 @@ body {
   height: 400px;
   grid-template-rows: 33.33% 33.33% 33.33%;
   grid-template-columns: 33.33% 33.33% 33.33%;
+  grid-gap: 3px;
 }
 
 #grid-container > div {

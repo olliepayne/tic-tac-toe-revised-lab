@@ -1,10 +1,3 @@
-// get input from the user and print a value onto the grid
-// store the values
-// cache html elements
-// have a win condition
-// initialize AND reset the grid
-// keep track of who wins each game
-
 // ---CACHED DOM ELEMENTS---
 const cellEls = document.getElementById('grid-container').querySelectorAll('div');
 for(let i = 0; i < cellEls.length; i++) {
@@ -25,6 +18,10 @@ const scoreEl = document.getElementById('score');
 scoreEl.innerHTML = 'Score X: 0 // O: 0';
 
 const gameMessageEl = document.getElementById('game-message');
+const resetButtonEl = document.getElementById('reset-button');
+resetButtonEl.addEventListener('click', function() {
+  init();
+});
 
 // ---GLOBAL VARIABLES---
 let running = false;
@@ -40,6 +37,8 @@ let computerScore = 0;
 function init() {
   // game is now running
   running = true;
+
+  gameMessageEl.innerHTML = '';
 
   // clear the visual grid
   for(let i = 0; i < cellEls.length; i++) {
@@ -65,11 +64,8 @@ function clickedCell(cellIndex) {
     if(grid[cellIndex] === '') {
       fillCell(cellIndex, playerPiece);
 
-      // play next turn if fill cell didnt trigger end game condition
-      if(running) {
-        turn++;
-        computerTurn();
-      }
+      turn++;
+      computerTurn();
     }
   }
 }
@@ -83,43 +79,57 @@ function fillCell(i, type) {
 function checkNeighbors(type) {
   for(let i = 0; i < grid.length; i++) {
     if(grid[i] === type) {
-      if(grid[i + 1] === type && grid[i + 2] === type) {  // horiz logic
-        endGame(type);
-      } else if(grid[i + 3] === type && grid[i + 6] === type) { // vert logic
-        endGame(type);
-      } else if(grid[i + 4] === type && grid[i + 8] === type) { // down-right logic
-        endGame(type);
-      } else if(grid[i + 2] === type && grid[i +4] === type) {  // down-left logic
-        endGame(type);
+      if(i === 0 || i % 3 === 0) {  // horiz
+        if(grid[i + 1] === type && grid[i + 2] === type) {
+          endGame(type);
+        }
+      }
+      
+      if(i < 3) { // vert
+        if(grid[i + 3] === type && grid[i + 6] === type) {
+          endGame(type);
+        }
+      }
+
+      if(i === 2) { // down left
+        if(grid[i + 2] === type && grid[i + 4] === type) {
+          endGame(type);
+        }
+      }
+
+      if(i === 0) { // down right
+        if(grid[i + 4] === type && grid[i + 8] === type) {
+          endGame(type);
+        }
       }
     }
   }
 }
 
 function computerTurn() {
-  if(turn % 2 === 0 && turn !== 10 && running) {
+  if(turn % 2 === 0 && turn < 10 && running) {
     let randomCellIndex = Math.floor(Math.random() * grid.length);
     while(grid[randomCellIndex] !== '') {
       randomCellIndex = Math.floor(Math.random() * grid.length);
     }
     fillCell(randomCellIndex, computerPiece);
-
-    // play next turn if fill cell didnt trigger end game condition
-    if(running) {
-      turn++;
-    }
+    turn++;
   } else if(turn === 10) {
-    init();
+    gameMessageEl.innerHTML = `It's a tie!`;
   }
 }
 
 function endGame(winningType) {
   running = false;
 
-  if(winningType === playerPiece) {
-    playerScore++;
-  } else if(winningType === computerPiece) {
-    computerScore++;
+  if(turn < 10) {
+    if(winningType === playerPiece) {
+      playerScore++;
+      gameMessageEl.innerHTML = 'X Wins!';
+    } else if(winningType === computerPiece) {
+      computerScore++;
+      gameMessageEl.innerHTML = 'O Wins!';
+    }
   }
 
   if(playerPiece === 'x') {
@@ -127,8 +137,6 @@ function endGame(winningType) {
   } else if(playerPiece === 'o'){
     scoreEl.innerHTML = `Score X: ${computerScore} // O: ${playerScore}`;
   }
-
-  init();
 }
 
 init();
